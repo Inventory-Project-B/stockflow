@@ -1,0 +1,20 @@
+:root {
+    --bg-primary: #7E3AF2;
+    --bs-secondary: #6c757d;
+    --bs-success: #198754;
+    --bs-info: #0dcaf0;
+    --bs-warning: #ffc107;
+    --bs-danger: #dc3545;
+    --bs-light: #f8f9fa;
+    --bs-dark: #212529;
+    --bs-body-color: #212529;
+    --bs-body-bg: #fff;
+  }
+  
+  .bg-primary {
+    background-color: var(--bg-primary) !important;
+  }
+  .bg-secondary {
+    background-color: var(--bs-secondary) !important;
+  }
+  /* Tambahkan lainnya sesuai kebutuhan */
