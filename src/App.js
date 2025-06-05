@@ -2,9 +2,12 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+
+import Laporan   from "./pages/Laporan";
 import Barang from "./pages/Barang";
 import BarangMasuk from "./pages/BarangMasuk";
 import BarangKeluar from "./pages/BarangKeluar";
+
 
 
 
@@ -14,6 +17,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/laporan" element={<Laporan />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/barang" element={<Barang />} />
         <Route path="/barang-masuk" element={<BarangMasuk />} />
