@@ -142,33 +142,6 @@ function Dashboard() {
                 </div>
               </div>
             </div>
-
-             <div className="row mt-4">
-              <div className="col-md-6 mb-4">
-                <div className="card">
-                  <div className="card-body">
-                    <BarangChart
-                      data={chartDataMasuk}
-                      title="Barang Masuk dari Supplier per Kategori"
-                      backgroundColor="rgba(0, 30, 255, 0.6)"
-                      borderColor="rgba(0, 30, 255, 0.6)"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-6 mb-4">
-                <div className="card">
-                  <div className="card-body">
-                    <BarangChart
-                      data={chartDataKeluar}
-                      title="Barang Keluar Terjual per Kategori"
-                      backgroundColor="rgba(255, 140, 0, 0.6)"
-                      borderColor="rgba(255, 140, 0, 0.6)"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
