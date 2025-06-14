@@ -1,152 +1,152 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { login } from "../api";
 import logo from "../assets/Logo.png";
-import "../assets/style.css";
+import "../assets/style.css"; // Pastikan untuk menyesuaikan path ini sesuai dengan struktur folder Anda
 
+// Variabel pada halaman login
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
-
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();  // Fungsi login pengguna
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    const dummyUser = {
-      username: "admin",
-      password: "admin123",
-      nama: "Admin",
-      role: "admin",
-    };
+    // Verifikasi data sebelum dikirim
+    if (!username || !password) {
+      setError("Username dan password harus diisi");
+      return;
+    }
 
-    if (username === dummyUser.username && password === dummyUser.password) {
-      localStorage.setItem("token", "dummy-token-123456");
-      localStorage.setItem(
-        "userData",
-        JSON.stringify({
-          nama: dummyUser.nama,
-          username: dummyUser.username,
-          role: dummyUser.role,
-        })
-      );
-      navigate("/dashboard");
-    } else {
-      setError("Username atau password salah");
+    console.log("Attempting login with:", { username, password });
+
+    try {
+      // Coba kirim dalam format yang berbeda untuk memastikan backend menerimanya
+      const credentials = {
+        username: username,
+        password: password,
+        // Kirim juga sebagai email untuk jaga-jaga
+        email: username
+      };
+
+      console.log("Sending credentials:", credentials);
+      const response = await login(credentials);
+
+      // Debug log untuk memeriksa struktur response
+      console.log("Login response:", response);
+
+      // Pastikan response memiliki struktur yang benar
+      if (response && response.token && response.user) {
+        localStorage.setItem("token", response.token);
+
+        // Simpan seluruh data user atau hanya properti yang diperlukan
+        localStorage.setItem(
+          "userData",
+          JSON.stringify({
+            nama: response.user.nama,
+            email: response.user.email,
+            role: response.user.role,
+          })
+        );
+
+        navigate("/dashboard");
+      } else {
+        throw new Error("Struktur response tidak valid");
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      // Logging untuk debugging
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      }
+      setError(error.response?.data?.message || "Username atau password salah");
     }
   };
 
+  // Konten pada halaman login
   return (
     <div
-      className="container-fluid"
-      style={{
-        backgroundColor: "#fff",
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      className="d-flex justify-content-center align-items-center"
+      style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}
     >
-      <div className="row shadow rounded-2 overflow-hidden" style={{ width: "800px", height: "470px" }}>
-
+      <div
+        className="row w-100 shadow rounded overflow-hidden"
+        style={{ maxWidth: "900px", minHeight: "500px" }}
+      >
         {/* Kolom Logo */}
         <div
-          className="col-md-5 d-flex flex-column align-items-center justify-content-center"
+          className="col-md-5 d-none d-md-flex align-items-center justify-content-center"
           style={{ backgroundColor: "#7E3AF2" }}
         >
-          <img
-            src={logo}
-            alt="Logo"
-            className="img-fluid mb-3"
-            style={{ maxWidth: "120px", marginTop: "-10px", paddingBottom: "10px" }}
-          />
-          <h1 style={{ fontSize: "1.7rem", fontWeight: "bold", color: "#fff", marginBottom: "5px" }}>
-            Stock<span className="text-dark">Flow</span>
-          </h1>
-          <h2 style={{ fontSize: "0.95rem", color: "#fff", marginBottom: "10px" }}>
-            Sistem Inventori Barang
-          </h2>
+          <div className="text-center text-white p-4">
+            <img
+              src={logo}
+              alt="Logo"
+              className="img-fluid mb-3"
+              style={{ maxWidth: "150px" }}
+            />
+            <h1 style={{ fontSize: "2.5rem", fontWeight: "bold" }}>
+              Stock<span className="text-dark">Flow</span>
+            </h1>
+            <h4>Sistem Inventori Barang</h4>
+          </div>
         </div>
 
         {/* Kolom Form Login */}
-        <div className="col-md-7 d-flex align-items-center justify-content-center">
-          <div className="card border-0 px-4" style={{ width: "100%", maxWidth: "350px" }}>
+        <div className="col-md-7 col-12 d-flex align-items-center justify-content-center bg-white">
+          <div className="p-4 w-100" style={{ maxWidth: "400px" }}>
             <h1
-              className="card-title mb-3"
-              style={{ fontSize: "1.5rem", fontWeight: "600", marginTop: "-5px", paddingBottom: "30px" }}
+              className="mb-4 text-center"
+              style={{ fontSize: "2rem", fontWeight: "bold" }}
             >
-              Masuk
+              MASUK
             </h1>
-
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>              <div className="mb-3">
+              <label
+                htmlFor="username"
+                className="form-label"
+                style={{ fontSize: "1.2rem" }}
+              >
+                Nama Pengguna
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
               <div className="mb-3">
-                <label htmlFor="username" className="form-label" style={{ fontSize: "1rem" }}>
-                  Nama Pengguna
-                </label>
-                <input
-                  type="text"
-                  className="form-control custom-input"
-                  id="username"
-                  style={{ height: "36px", fontSize: "0.9rem" }}
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="mb-3 position-relative">
-                <label htmlFor="password" className="form-label" style={{ fontSize: "1rem" }}>
+                <label
+                  htmlFor="password"
+                  className="form-label"
+                  style={{ fontSize: "1.2rem" }}
+                >
                   Kata Sandi
                 </label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  className="form-control custom-input"
+                  type="password"
+                  className="form-control"
                   id="password"
-                  style={{
-                    height: "36px",
-                    fontSize: "0.9rem",
-                    paddingRight: "40px"
-                  }}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                <span
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: "absolute",
-                    right: "10px",
-                    top: "38px",
-                    cursor: "pointer",
-                    color: "#000",
-                    fontSize: "1rem",
-                  }}
-                >
-                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
-                </span>
               </div>
-
-              {/* Alert error */}
-              <div style={{ minHeight: "40px", marginBottom: "10px" }}>
-                {error && (
-                  <div className="alert alert-danger p-2 text-center m-0" style={{ fontSize: "0.9rem" }}>
-                    {error}
-                  </div>
-                )}
-              </div>
-
-              <div className="d-grid mt-3">
+              {error && <div className="alert alert-danger">{error}</div>}
+              <div className="d-grid">
                 <button
                   type="submit"
-                  className="btn text-white font-weight-bold"
+                  className="btn text-white"
                   style={{
                     backgroundColor: "#7E3AF2",
-                    fontSize: "1rem",
+                    fontSize: "1.2rem",
                     fontWeight: "bold",
-                    padding: "10px",
                   }}
                 >
                   Masuk

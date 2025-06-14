@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import {
-  PDFViewer,
   Document,
   Page,
   Text,
@@ -12,8 +11,7 @@ import {
 } from "@react-pdf/renderer";
 import { pdf } from "@react-pdf/renderer";
 
-// Base64 logo (bisa diganti dengan path image juga kalau lokal)
-const logoBase64 = "data:image/png;base64,..."; // Ganti dengan logo base64 kamu
+// Base logo comment removed - using direct image path instead
 
 // Format currency
 const formatCurrency = (amount) => {
@@ -24,21 +22,131 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
+// Komponen cetak PDF untuk Stok Barang
+const PDFStokBarang = ({ data, filter }) => (
+  <Document>
+    <Page size="A4" style={styles.page}>
+      {/* Kop Surat dengan Logo */}      <View style={styles.companyHeader}>
+        <View style={styles.headerRow}>
+          <Image style={styles.logo} src="/Logo.png" />
+          <View style={styles.companyText}>
+            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+              <Text style={{ ...styles.companyName, color: '#7E3AF2', fontWeight: '600' }}>Stock</Text>
+              <Text style={{ ...styles.companyName, color: '#212529' }}>Flow</Text>
+            </View>
+            <Text style={styles.companyAddress}>
+              Alamat: Jl. Perintis Kemerdekaan No.277 Karsamenak, Kode Pos 46182
+            </Text>
+            <Text style={styles.companyContact}>
+              Telp: 0821-2345-6789 | Website: https://stockflow.com
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.header}>
+        <Text style={styles.title}>LAPORAN STOK BARANG</Text>
+        <Text style={styles.subtitle}>
+          Tanggal: {new Date().toLocaleDateString("id-ID")}
+        </Text>
+      </View>
+
+      {/* Tabel Data */}      <View style={styles.table}>
+        <View style={styles.tableRow}>
+          <View style={{ ...styles.tableColHeader, width: "10%" }}>
+            <Text style={styles.textHeader}>No</Text>
+          </View>
+          <View style={{ ...styles.tableColHeader, width: "35%" }}>
+            <Text style={styles.textHeader}>Nama Barang</Text>
+          </View>
+          <View style={{ ...styles.tableColHeader, width: "20%" }}>
+            <Text style={styles.textHeader}>Kategori</Text>
+          </View>
+          <View style={{ ...styles.tableColHeader, width: "15%" }}>
+            <Text style={styles.textHeader}>Harga</Text>
+          </View>
+          <View style={{ ...styles.tableColHeader, width: "20%" }}>
+            <Text style={styles.textHeader}>Stok</Text>
+          </View>
+        </View>
+
+        {data.map((item, index) => (
+          <View style={styles.tableRow} key={index}>
+            <View style={{ ...styles.tableCol, width: "10%" }}>
+              <Text style={{ ...styles.text, textAlign: "center" }}>{index + 1}</Text>
+            </View>            <View style={{ ...styles.tableCol, width: "35%" }}>
+              <Text style={{ ...styles.text, textAlign: "center" }}>{item.nama_barang || item.nama}</Text>
+            </View>
+            <View style={{ ...styles.tableCol, width: "20%" }}>
+              <Text style={styles.text}>{item.kategori}</Text>
+            </View>            <View style={{ ...styles.tableCol, width: "15%" }}>
+              <Text style={{ ...styles.text, textAlign: "center" }}>{formatCurrency(item.harga)}</Text>
+            </View>
+            <View style={{ ...styles.tableCol, width: "20%" }}>
+              <Text style={{ ...styles.text, textAlign: "center" }}>{item.stok || 0}</Text>
+            </View>
+          </View>
+        ))}
+        {/* Total Row */}        <View style={styles.tableRow}>          <View style={{ ...styles.tableCol, width: "80%", backgroundColor: "#f0f0f0" }}>
+          <Text style={{ ...styles.text, textAlign: "center", fontWeight: "bold" }}>Total Stok</Text>
+        </View>
+          <View style={{ ...styles.tableCol, width: "20%", backgroundColor: "#f0f0f0" }}>
+            <Text style={{ ...styles.text, textAlign: "center", fontWeight: "bold" }}>
+              {data.reduce((sum, item) => sum + (item.stok || 0), 0)}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Tanda Tangan */}
+      <View style={styles.footer}>
+        <View style={styles.signatureBox}>
+          <Text style={styles.signatureLabel}>Diketahui,</Text>
+          <Text style={styles.signatureRole}>Pemilik</Text>
+          <View style={styles.signatureSpace} />
+          <Text style={styles.signatureLine}>(__________________________)</Text>
+        </View>
+        <View style={styles.signatureBox}>
+          <Text style={styles.signatureDate}>
+            Tasikmalaya, {new Date().toLocaleDateString("id-ID")}
+          </Text>
+          <Text style={styles.signatureRole}>Admin Gudang</Text>
+          <View style={styles.signatureSpace} />
+          <Text style={styles.signatureLine}>(__________________________)</Text>
+        </View>
+      </View>
+
+      {/* Nomor Halaman */}
+      <Text
+        style={styles.pageNumber}
+        render={({ pageNumber, totalPages }) =>
+          `Halaman ${pageNumber} dari ${totalPages}`
+        }
+        fixed
+      />
+    </Page>
+  </Document>
+);
+
 // Komponen cetak PDF untuk Barang Masuk
 const PDFBarangMasuk = ({ data, filter }) => (
   <Document>
     <Page size="A4" style={styles.page}>
-      {/* Kop Surat dengan Logo */}
-      <View style={styles.companyHeader}>
-        <Image style={styles.logo} src="/Logo.png" />
-        <View style={styles.companyText}>
-          <Text style={styles.companyName}>STOCKFLOW</Text>
-          <Text style={styles.companyAddress}>
-            Alamat: Jl. Perintis Kemerdekaan No.277 Karsamenak, Kode Pos 46182
-          </Text>
-          <Text style={styles.companyContact}>
-            Telp: 0821-2345-6789 | Website: https://stockflow.com
-          </Text>
+      {/* Kop Surat dengan Logo */}      <View style={styles.companyHeader}>
+        <View style={styles.headerRow}>
+          <Image style={styles.logo} src="/Logo.png" />
+          <View style={styles.companyText}>
+            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+              <Text style={{ ...styles.companyName, color: '#7E3AF2', fontWeight: '600' }}>Stock</Text>
+              <Text style={{ ...styles.companyName, color: '#212529' }}>Flow</Text>
+            </View>
+            <Text style={styles.companyAddress}>
+              Alamat: Jl. Perintis Kemerdekaan No.277 Karsamenak, Kode Pos 46182
+            </Text>
+            <Text style={styles.companyContact}>
+              Telp: 0821-2345-6789 | Website: https://stockflow.com
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -69,21 +177,33 @@ const PDFBarangMasuk = ({ data, filter }) => (
         {data.map((item, index) => (
           <View style={styles.tableRow} key={index}>
             <View style={styles.tableCol}>
-              <Text style={styles.text}>{index + 1}</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.text}>
+              <Text style={{ ...styles.text, textAlign: "center" }}>{index + 1}</Text>
+            </View>            <View style={styles.tableCol}>
+              <Text style={{ ...styles.text, textAlign: "center" }}>
                 {new Date(item.tanggal).toLocaleDateString("id-ID")}
               </Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.text}>{item.nama_barang}</Text>
+              <Text style={{ ...styles.text, textAlign: "center" }}>{item.nama_barang}</Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.text}>{item.jumlah}</Text>
-            </View>
-          </View>
+              <Text style={{ ...styles.text, textAlign: "center" }}>{item.jumlah}</Text>
+            </View>          </View>
         ))}
+
+        {/* Total Row */}
+        <View style={styles.tableRow}>
+          <View style={{ ...styles.tableCol, width: "75%", backgroundColor: "#f0f0f0" }}>
+            <Text style={{ ...styles.text, textAlign: "center", fontWeight: "bold" }}>
+              Total Barang Masuk Dari Supplier
+            </Text>
+          </View>
+          <View style={{ ...styles.tableCol, width: "25%", backgroundColor: "#f0f0f0" }}>
+            <Text style={{ ...styles.text, textAlign: "center", fontWeight: "bold" }}>
+              {data.reduce((sum, item) => sum + (parseInt(item.jumlah) || 0), 0)}
+            </Text>
+          </View>
+        </View>
       </View>
 
       {/* Tanda Tangan */}
@@ -120,17 +240,21 @@ const PDFBarangMasuk = ({ data, filter }) => (
 const PDFBarangKeluar = ({ data, filter }) => (
   <Document>
     <Page size="A4" style={styles.page}>
-      {/* Kop Surat dengan Logo */}
-      <View style={styles.companyHeader}>
-        <Image style={styles.logo} src="/Logo.png" />
-        <View style={styles.companyText}>
-          <Text style={styles.companyName}>STOCKFLOW</Text>
-          <Text style={styles.companyAddress}>
-            Alamat: Jl. Perintis Kemerdekaan No.277 Karsamenak, Kode Pos 46182
-          </Text>
-          <Text style={styles.companyContact}>
-            Telp: 0821-2345-6789 | Website: https://stockflow.com
-          </Text>
+      {/* Kop Surat dengan Logo */}      <View style={styles.companyHeader}>
+        <View style={styles.headerRow}>
+          <Image style={styles.logo} src="/Logo.png" />
+          <View style={styles.companyText}>
+            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+              <Text style={{ ...styles.companyName, color: '#7E3AF2', fontWeight: '600' }}>Stock</Text>
+              <Text style={{ ...styles.companyName, color: '#212529' }}>Flow</Text>
+            </View>
+            <Text style={styles.companyAddress}>
+              Alamat: Jl. Perintis Kemerdekaan No.277 Karsamenak, Kode Pos 46182
+            </Text>
+            <Text style={styles.companyContact}>
+              Telp: 0821-2345-6789 | Website: https://stockflow.com
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -168,28 +292,40 @@ const PDFBarangKeluar = ({ data, filter }) => (
           <View style={styles.tableRow} key={index}>
             <View style={styles.tableCol}>
               <Text style={styles.text}>{index + 1}</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.text}>
+            </View>            <View style={styles.tableCol}>
+              <Text style={{ ...styles.text, textAlign: 'center' }}>
                 {new Date(item.tanggal).toLocaleDateString("id-ID")}
               </Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.text}>{item.nama_barang}</Text>
+              <Text style={{ ...styles.text, textAlign: 'center' }}>{item.nama_barang}</Text>
             </View>
             <View style={styles.tableCol}>
               <Text style={styles.text}>{formatCurrency(item.harga)}</Text>
             </View>
             <View style={styles.tableCol}>
               <Text style={styles.text}>{item.jumlah}</Text>
-            </View>
-            <View style={styles.tableCol}>
+            </View>            <View style={styles.tableCol}>
               <Text style={styles.text}>
                 {formatCurrency(item.jumlah * item.harga)}
               </Text>
             </View>
           </View>
         ))}
+
+        {/* Total Row */}
+        <View style={styles.tableRow}>
+          <View style={{ ...styles.tableCol, width: "83.33%", backgroundColor: "#f0f0f0" }}>
+            <Text style={{ ...styles.text, textAlign: "center", fontWeight: "bold" }}>
+              Total Harga Barang Yang Terjual
+            </Text>
+          </View>
+          <View style={{ ...styles.tableCol, width: "16.67%", backgroundColor: "#f0f0f0" }}>
+            <Text style={{ ...styles.text, textAlign: "center", fontWeight: "bold" }}>
+              {formatCurrency(data.reduce((sum, item) => sum + (item.jumlah * item.harga), 0))}
+            </Text>
+          </View>
+        </View>
       </View>
 
       {/* Tanda Tangan */}
@@ -229,14 +365,16 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: "Helvetica",
     position: "relative",
-  },
-  companyHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+  }, companyHeader: {
     marginBottom: 20,
     borderBottom: 1,
     borderColor: "#000",
     paddingBottom: 10,
+  }, headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start", // Mengubah dari center menjadi flex-start agar lebih ke kiri
+    paddingLeft: 0, // Menghapus padding kiri untuk memposisikan ke paling kiri
   },
   logo: {
     width: 60,
@@ -247,6 +385,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     textAlign: "center",
     flex: 1,
+    marginLeft: -80, // Menggeser teks perusahaan lebih ke kiri lagi
   },
   companyName: {
     fontSize: 16,
@@ -338,9 +477,9 @@ const styles = StyleSheet.create({
 const LaporanPage = () => {
   const [barangMasuk, setBarangMasuk] = useState([]);
   const [barangKeluar, setBarangKeluar] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [searchKeyword, setSearchKeyword] = useState("");
+  const [inventory, setInventory] = useState([]);  // No longer need these states as we've moved to per-report pagination
+  // const [itemsPerPage, setItemsPerPage] = useState(10);
+  // const [searchKeyword, setSearchKeyword] = useState("");
 
   // State untuk pagination dan search barang masuk
   const [paginationMasuk, setPaginationMasuk] = useState({
@@ -355,13 +494,102 @@ const LaporanPage = () => {
     itemsPerPage: 10,
     searchKeyword: "",
   });
+  // State untuk pagination dan search inventory
+  const [paginationInventory, setPaginationInventory] = useState({
+    currentPage: 1,
+    itemsPerPage: 10,
+    searchKeyword: "",
+  });
 
-  // Filter data berdasarkan keyword pencarian untuk barang masuk
-  const filteredBarangMasuk = barangMasuk.filter((item) =>
-    item.nama_barang
+  // Filter state declarations need to be before any filters that use them
+  const [filterMasuk, setFilterMasuk] = useState({
+    startDate: "",
+    endDate: "",
+    applied: false,
+  });
+  const [filterKeluar, setFilterKeluar] = useState({
+    startDate: "",
+    endDate: "",
+    applied: false,
+  });
+
+  // State for custom confirmation modal
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    type: "", // "masuk" or "keluar"
+  });
+
+  const [loading, setLoading] = useState({
+    masuk: false,
+    keluar: false,
+    inventory: false
+  });
+  const [pdfPreview, setPdfPreview] = useState({
+    show: false,
+    type: "",
+    url: "",
+  });
+  const token = localStorage.getItem("token");
+
+  // Filter data berdasarkan keyword pencarian untuk inventory
+  const filteredInventory = inventory.filter((item) =>
+    (item.nama_barang || item.nama || '')
       .toLowerCase()
-      .includes(paginationMasuk.searchKeyword.toLowerCase())
+      .includes(paginationInventory.searchKeyword.toLowerCase())
   );
+
+  // Paginasi inventory
+  const totalPagesInventory = Math.ceil(
+    filteredInventory.length / paginationInventory.itemsPerPage
+  );
+  const startIndexInventory =
+    (paginationInventory.currentPage - 1) * paginationInventory.itemsPerPage;
+  const endIndexInventory = startIndexInventory + paginationInventory.itemsPerPage;
+  const currentInventory = filteredInventory.slice(
+    startIndexInventory,
+    endIndexInventory
+  );  // Filter data berdasarkan keyword pencarian dan tanggal untuk barang masuk
+  const filteredBarangMasuk = barangMasuk.filter((item) => {
+    // Filter by search keyword
+    const keywordMatch = (item.nama_barang || '')
+      .toLowerCase()
+      .includes(paginationMasuk.searchKeyword.toLowerCase());
+
+    // Filter by date range if applied
+    let dateMatch = true;
+    if (filterMasuk.applied && (filterMasuk.startDate || filterMasuk.endDate)) {
+      if (!item.tanggal) {
+        // If item doesn't have a date, it doesn't match date filters
+        return false;
+      }
+
+      // Normalize the item date to start of day for consistent comparison
+      const itemDate = new Date(item.tanggal);
+      itemDate.setHours(0, 0, 0, 0);
+
+      if (filterMasuk.startDate && filterMasuk.endDate) {
+        // Create dates at start of day for start date
+        const startDate = new Date(filterMasuk.startDate);
+        startDate.setHours(0, 0, 0, 0);
+
+        // Create date at end of day for end date
+        const endDate = new Date(filterMasuk.endDate);
+        endDate.setHours(23, 59, 59, 999);
+
+        dateMatch = itemDate >= startDate && itemDate <= endDate;
+      } else if (filterMasuk.startDate) {
+        const startDate = new Date(filterMasuk.startDate);
+        startDate.setHours(0, 0, 0, 0);
+        dateMatch = itemDate >= startDate;
+      } else if (filterMasuk.endDate) {
+        const endDate = new Date(filterMasuk.endDate);
+        endDate.setHours(23, 59, 59, 999);
+        dateMatch = itemDate <= endDate;
+      }
+    }
+
+    return keywordMatch && dateMatch;
+  });
 
   // Paginasi barang masuk
   const totalPagesMasuk = Math.ceil(
@@ -373,14 +601,56 @@ const LaporanPage = () => {
   const currentBarangMasuk = filteredBarangMasuk.slice(
     startIndexMasuk,
     endIndexMasuk
-  );
-
-  // Filter data berdasarkan keyword pencarian untuk barang keluar
-  const filteredBarangKeluar = barangKeluar.filter((item) =>
-    item.nama_barang
+  );  // Filter data berdasarkan keyword pencarian dan tanggal untuk barang keluar
+  const filteredBarangKeluar = barangKeluar.filter((item) => {
+    // Filter by search keyword
+    const keywordMatch = (item.nama_barang || '')
       .toLowerCase()
-      .includes(paginationKeluar.searchKeyword.toLowerCase())
-  );
+      .includes(paginationKeluar.searchKeyword.toLowerCase());
+
+    // Filter by date range if applied
+    let dateMatch = true;
+    if (filterKeluar.applied && (filterKeluar.startDate || filterKeluar.endDate)) {
+      if (!item.tanggal) {
+        // If item doesn't have a date, it doesn't match date filters
+        return false;
+      }
+
+      // Normalize the item date to start of day for consistent comparison
+      const itemDate = new Date(item.tanggal);
+      itemDate.setHours(0, 0, 0, 0);
+
+      if (filterKeluar.startDate && filterKeluar.endDate) {
+        // Create dates at start of day for start date
+        const startDate = new Date(filterKeluar.startDate);
+        startDate.setHours(0, 0, 0, 0);
+
+        // Create date at end of day for end date
+        const endDate = new Date(filterKeluar.endDate);
+        endDate.setHours(23, 59, 59, 999);
+
+        dateMatch = itemDate >= startDate && itemDate <= endDate;
+      } else if (filterKeluar.startDate) {
+        const startDate = new Date(filterKeluar.startDate);
+        startDate.setHours(0, 0, 0, 0);
+        dateMatch = itemDate >= startDate;
+      } else if (filterKeluar.endDate) {
+        const endDate = new Date(filterKeluar.endDate);
+        endDate.setHours(23, 59, 59, 999);
+        dateMatch = itemDate <= endDate;
+      }
+    }
+
+    return keywordMatch && dateMatch;
+  });
+  // Handler untuk search inventory
+  const handleSearchInventory = (e) => {
+    setPaginationInventory((prev) => ({
+      ...prev,
+      searchKeyword: e.target.value,
+      currentPage: 1,
+    }));
+  };
 
   // Handler untuk search barang masuk
   const handleSearchMasuk = (e) => {
@@ -396,6 +666,14 @@ const LaporanPage = () => {
     setPaginationKeluar((prev) => ({
       ...prev,
       searchKeyword: e.target.value,
+      currentPage: 1,
+    }));
+  };
+  // Handler untuk items per page inventory
+  const handleItemsPerPageInventory = (e) => {
+    setPaginationInventory((prev) => ({
+      ...prev,
+      itemsPerPage: Number(e.target.value),
       currentPage: 1,
     }));
   };
@@ -418,6 +696,14 @@ const LaporanPage = () => {
     }));
   };
 
+  // Handler untuk page change inventory
+  const handlePageChangeInventory = (page) => {
+    setPaginationInventory((prev) => ({
+      ...prev,
+      currentPage: page,
+    }));
+  };
+
   // Handler untuk page change barang masuk
   const handlePageChangeMasuk = (page) => {
     setPaginationMasuk((prev) => ({
@@ -433,7 +719,6 @@ const LaporanPage = () => {
       currentPage: page,
     }));
   };
-
   // Paginasi barang keluar
   const totalPagesKeluar = Math.ceil(
     filteredBarangKeluar.length / paginationKeluar.itemsPerPage
@@ -445,66 +730,80 @@ const LaporanPage = () => {
     startIndexKeluar,
     endIndexKeluar
   );
-
-  const [filterMasuk, setFilterMasuk] = useState({
-    startDate: "",
-    endDate: "",
-    applied: false,
-  });
-  const [filterKeluar, setFilterKeluar] = useState({
-    startDate: "",
-    endDate: "",
-    applied: false,
-  });
-  const [loading, setLoading] = useState({
-    masuk: false,
-    keluar: false,
-  });
-  const [pdfPreview, setPdfPreview] = useState({
-    show: false,
-    type: "",
-    url: "",
-  });
-  const token = localStorage.getItem("token");
-
   // Format tanggal untuk tampilan
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    const options = { day: "2-digit", month: "long", year: "numeric" };
-    return new Date(dateString).toLocaleDateString("id-ID", options);
-  };
+    try {
+      const date = new Date(dateString);
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.error("Invalid date:", dateString);
+        return "";
+      }
 
+      const options = { day: "2-digit", month: "long", year: "numeric" };
+      return date.toLocaleDateString("id-ID", options);
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "";
+    }
+  };
   // Terapkan filter untuk barang masuk
   const applyFilterMasuk = () => {
+    // Validate dates before applying filter
+    if (filterMasuk.startDate && filterMasuk.endDate) {
+      const startDate = new Date(filterMasuk.startDate);
+      const endDate = new Date(filterMasuk.endDate);
+
+      if (endDate < startDate) {
+        alert("Tanggal akhir tidak boleh lebih awal dari tanggal mulai");
+        return;
+      }
+    }
+
     fetchBarangMasuk(true);
   };
 
   // Reset filter barang masuk
   const resetFilterMasuk = () => {
+    // First update the state
     setFilterMasuk({
       startDate: "",
       endDate: "",
       applied: false,
     });
+
+    // Then fetch data without filters
     fetchBarangMasuk(false);
   };
-
   // Terapkan filter untuk barang keluar
   const applyFilterKeluar = () => {
+    // Validate dates before applying filter
+    if (filterKeluar.startDate && filterKeluar.endDate) {
+      const startDate = new Date(filterKeluar.startDate);
+      const endDate = new Date(filterKeluar.endDate);
+
+      if (endDate < startDate) {
+        alert("Tanggal akhir tidak boleh lebih awal dari tanggal mulai");
+        return;
+      }
+    }
+
     fetchBarangKeluar(true);
   };
 
   // Reset filter barang keluar
   const resetFilterKeluar = () => {
+    // First update the state
     setFilterKeluar({
       startDate: "",
       endDate: "",
       applied: false,
     });
-    fetchBarangKeluar(false);
-  };
 
-  // Mengambil data barang masuk menggunakan API
+    // Then fetch data without filters
+    fetchBarangKeluar(false);
+  };// Mengambil data barang masuk menggunakan API
   const fetchBarangMasuk = async (applyFilter = false) => {
     try {
       setLoading((prev) => ({ ...prev, masuk: true }));
@@ -513,26 +812,46 @@ const LaporanPage = () => {
       const params = new URLSearchParams();
 
       if (applyFilter) {
-        if (filterMasuk.startDate)
-          params.append("start", filterMasuk.startDate);
-        if (filterMasuk.endDate) params.append("end", filterMasuk.endDate);
+        if (filterMasuk.startDate) {
+          params.append("startDate", filterMasuk.startDate);
+          console.log("Adding startDate filter:", filterMasuk.startDate);
+        }
+        if (filterMasuk.endDate) {
+          params.append("endDate", filterMasuk.endDate);
+          console.log("Adding endDate filter:", filterMasuk.endDate);
+        }
         setFilterMasuk((prev) => ({ ...prev, applied: true }));
+      } else {
+        // Reset the filter state when not applying filter
+        if (filterMasuk.applied) {
+          setFilterMasuk((prev) => ({ ...prev, applied: false }));
+        }
       }
 
-      const res = await fetch(`${url}?${params.toString()}`, {
+      const fullUrl = `${url}?${params.toString()}`;
+      console.log("Fetching barang masuk with URL:", fullUrl);
+
+      const res = await fetch(fullUrl, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}, URL: ${fullUrl}`);
+      }
+
       const data = await res.json();
-      setBarangMasuk(data);
+      console.log(`Received ${data.length} barang masuk records`);
+
+      setBarangMasuk(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching barang masuk:", error);
+      alert("Terjadi kesalahan saat mengambil data barang masuk");
     } finally {
       setLoading((prev) => ({ ...prev, masuk: false }));
     }
   };
-
   // Mengambil data barang keluar menggunakan API
   const fetchBarangKeluar = async (applyFilter = false) => {
     try {
@@ -542,21 +861,42 @@ const LaporanPage = () => {
       const params = new URLSearchParams();
 
       if (applyFilter) {
-        if (filterKeluar.startDate)
-          params.append("start", filterKeluar.startDate);
-        if (filterKeluar.endDate) params.append("end", filterKeluar.endDate);
+        if (filterKeluar.startDate) {
+          params.append("startDate", filterKeluar.startDate);
+          console.log("Adding startDate filter:", filterKeluar.startDate);
+        }
+        if (filterKeluar.endDate) {
+          params.append("endDate", filterKeluar.endDate);
+          console.log("Adding endDate filter:", filterKeluar.endDate);
+        }
         setFilterKeluar((prev) => ({ ...prev, applied: true }));
+      } else {
+        // Reset the filter state when not applying filter
+        if (filterKeluar.applied) {
+          setFilterKeluar((prev) => ({ ...prev, applied: false }));
+        }
       }
 
-      const res = await fetch(`${url}?${params.toString()}`, {
+      const fullUrl = `${url}?${params.toString()}`;
+      console.log("Fetching barang keluar with URL:", fullUrl);
+
+      const res = await fetch(fullUrl, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}, URL: ${fullUrl}`);
+      }
+
       const data = await res.json();
-      setBarangKeluar(data);
+      console.log(`Received ${data.length} barang keluar records`);
+
+      setBarangKeluar(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching barang keluar:", error);
+      alert("Terjadi kesalahan saat mengambil data barang keluar");
     } finally {
       setLoading((prev) => ({ ...prev, keluar: false }));
     }
@@ -578,17 +918,48 @@ const LaporanPage = () => {
       ...prev,
       [name]: value,
     }));
+  };  // Generate dan preview PDF
+  const previewPDF = async (type) => {
+    try {
+      // Cek apakah filter diterapkan saat mencetak laporan
+      const isFiltered = type === "inventory" ? true : // Inventaris tidak memerlukan filter
+        type === "masuk" ? filterMasuk.applied :
+          type === "keluar" ? filterKeluar.applied : false;
+
+      // Show custom confirmation modal if no filter is applied (except for inventory)
+      if (!isFiltered && type !== "inventory") {
+        setConfirmModal({
+          show: true,
+          type: type
+        });
+        return; // Wait for user response in the modal
+      }
+
+      // Continue with PDF creation
+      await generatePDF(type);
+
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
   };
 
-  // Generate dan preview PDF
-  const previewPDF = async (type) => {
+  // Separate function to generate PDF after confirmation
+  const generatePDF = async (type) => {
     try {
       let pdfDoc;
 
-      if (type === "masuk") {
+      if (type === "inventory") {
+        pdfDoc = (
+          <PDFStokBarang
+            data={inventory}
+            filter={{}}
+          />
+        );
+      } else if (type === "masuk") {
+        // Gunakan data yang sudah difilter untuk PDF barang masuk
         pdfDoc = (
           <PDFBarangMasuk
-            data={barangMasuk}
+            data={filterMasuk.applied ? filteredBarangMasuk : barangMasuk}
             filter={{
               startDate: filterMasuk.applied
                 ? formatDate(filterMasuk.startDate)
@@ -602,7 +973,7 @@ const LaporanPage = () => {
       } else {
         pdfDoc = (
           <PDFBarangKeluar
-            data={barangKeluar}
+            data={filterKeluar.applied ? filteredBarangKeluar : barangKeluar}
             filter={{
               startDate: filterKeluar.applied
                 ? formatDate(filterKeluar.startDate)
@@ -625,6 +996,7 @@ const LaporanPage = () => {
       });
     } catch (error) {
       console.error("Error generating PDF:", error);
+      alert("Terjadi kesalahan saat membuat PDF. Silahkan coba lagi.");
     }
   };
 
@@ -636,35 +1008,90 @@ const LaporanPage = () => {
       url: "",
     });
   };
-
   // Download PDF
   const downloadPDF = () => {
     const link = document.createElement("a");
     link.href = pdfPreview.url;
-    link.download = `laporan-barang-${pdfPreview.type}.pdf`;
-    link.click();
-    closePreview();
-  };
 
+    let filename = 'laporan';
+    if (pdfPreview.type === 'inventory') {
+      filename = `laporan-stok-barang-${new Date().toLocaleDateString('id-ID')}.pdf`;
+    } else {
+      const type = pdfPreview.type === 'masuk' ? 'masuk' : 'keluar';
+      filename = `laporan-barang-${type}-${new Date().toLocaleDateString('id-ID')}.pdf`;
+    }
+
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  // Mengambil data inventory menggunakan API
+  const fetchInventory = async () => {
+    try {
+      setLoading((prev) => ({ ...prev, inventory: true }));
+
+      const res = await fetch("http://localhost:5000/api/barang", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      setInventory(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+    } finally {
+      setLoading((prev) => ({ ...prev, inventory: false }));
+    }
+  };
   // Load data awal saat komponen mount
   useEffect(() => {
-    fetchBarangMasuk();
-    fetchBarangKeluar();
+    const loadInitialData = async () => {
+      // Menggunakan Promise.all untuk memuat semua data secara paralel
+      await Promise.all([
+        fetchBarangMasuk(),
+        fetchBarangKeluar(),
+        fetchInventory()
+      ]);
+    };
+
+    loadInitialData();
+    // Using empty dependency array since we only want to load once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Filter data berdasarkan keyword pencarian
-  const filteredItems = barangKeluar.filter((item) => {
-    const searchMatch = item.nama_barang
-      .toLowerCase()
-      .includes(searchKeyword.toLowerCase());
-    return searchMatch;
-  });
+  // Reset page to 1 when filter is applied for Barang Masuk
+  useEffect(() => {
+    if (filterMasuk.applied) {
+      setPaginationMasuk(prev => ({
+        ...prev,
+        currentPage: 1
+      }));
+    }
+  }, [filterMasuk.applied, filterMasuk.startDate, filterMasuk.endDate]);
 
-  // Paginasi
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+  // Reset page to 1 when filter is applied for Barang Keluar
+  useEffect(() => {
+    if (filterKeluar.applied) {
+      setPaginationKeluar(prev => ({
+        ...prev,
+        currentPage: 1
+      }));
+    }
+  }, [filterKeluar.applied, filterKeluar.startDate, filterKeluar.endDate]);
+
+  // We're now using dedicated pagination for each report type, so this old code is removed
+  // const filteredItems = barangKeluar.filter((item) => {
+  //   const searchMatch = item.nama_barang
+  //     .toLowerCase()
+  //     .includes(searchKeyword.toLowerCase());
+  //   return searchMatch;
+  // });
+
+  // const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  // const indexOfLastItem = currentPage * itemsPerPage;
+  // const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  // const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
 
   // Konten utama pada halaman laporan
   return (
@@ -731,13 +1158,12 @@ const LaporanPage = () => {
                   disabled={loading.masuk || !filterMasuk.applied}
                 >
                   <i className="bi bi-arrow-counterclockwise me-2"></i>Reset
-                </button>
-                <button
+                </button>                <button
                   className="btn btn-success ms-auto"
                   onClick={() => previewPDF("masuk")}
                   disabled={loading.masuk || barangMasuk.length === 0}
                 >
-                  <i className="bi bi-printer me-2"></i>Cetak PDF
+                  <i className="bi bi-printer me-2"></i>Cetak
                 </button>
               </div>
             </div>
@@ -773,8 +1199,6 @@ const LaporanPage = () => {
                       <option value="100">100</option>
                     </select>
                   </div>
-
-                  {/* <span className="fw-semibold me-5">Total Data: {inventory.length}</span> */}
                   <div className="d-flex align-items-center w-25 me-3">
                     <label className="me-2 mb-0 fw-semibold">Search:</label>
                     <input
@@ -786,10 +1210,11 @@ const LaporanPage = () => {
                     />
                   </div>
                 </div>
+
                 {/* Tabel Barang Masuk */}
                 <div className="mt-3 table-responsive">
                   <table className="table table-bordered">
-                    <thead className="table-primary">
+                    <thead className="table-info">
                       <tr>
                         <th className="text-center">No</th>
                         <th className="text-center">Tanggal</th>
@@ -805,9 +1230,7 @@ const LaporanPage = () => {
                               className="spinner-border text-primary"
                               role="status"
                             >
-                              <span className="visually-hidden">
-                                Loading...
-                              </span>
+                              <span className="visually-hidden">Loading...</span>
                             </div>
                           </td>
                         </tr>
@@ -840,10 +1263,9 @@ const LaporanPage = () => {
                         Menampilkan {startIndexMasuk + 1}-
                         {Math.min(endIndexMasuk, filteredBarangMasuk.length)}{" "}
                         dari {filteredBarangMasuk.length} item
-                      </span>
-                      <div>
+                      </span>                      <div className="d-flex">
                         <button
-                          className="btn btn-outline-primary me-3"
+                          className="btn btn-outline-primary me-1"
                           onClick={() =>
                             handlePageChangeMasuk(
                               paginationMasuk.currentPage - 1
@@ -851,10 +1273,24 @@ const LaporanPage = () => {
                           }
                           disabled={paginationMasuk.currentPage === 1}
                         >
-                          &laquo; Previous
+                          &lt;
                         </button>
+
+                        {[...Array(totalPagesMasuk).keys()].slice(
+                          Math.max(0, paginationMasuk.currentPage - 3),
+                          Math.min(totalPagesMasuk, paginationMasuk.currentPage + 2)
+                        ).map(i => (
+                          <button
+                            key={i + 1}
+                            className={`btn ${paginationMasuk.currentPage === i + 1 ? 'btn-primary' : 'btn-outline-primary'} mx-1`}
+                            onClick={() => handlePageChangeMasuk(i + 1)}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+
                         <button
-                          className="btn btn-outline-primary"
+                          className="btn btn-outline-primary ms-1"
                           onClick={() =>
                             handlePageChangeMasuk(
                               paginationMasuk.currentPage + 1
@@ -865,7 +1301,7 @@ const LaporanPage = () => {
                             totalPagesMasuk === 0
                           }
                         >
-                          Next &raquo;
+                          &gt;
                         </button>
                       </div>
                     </div>
@@ -928,13 +1364,12 @@ const LaporanPage = () => {
                   disabled={loading.keluar || !filterKeluar.applied}
                 >
                   <i className="bi bi-arrow-counterclockwise me-2"></i>Reset
-                </button>
-                <button
+                </button>                <button
                   className="btn btn-success ms-auto"
                   onClick={() => previewPDF("keluar")}
                   disabled={loading.keluar || barangKeluar.length === 0}
                 >
-                  <i className="bi bi-printer me-2"></i>Cetak PDF
+                  <i className="bi bi-printer me-2"></i>Cetak
                 </button>
               </div>
             </div>
@@ -953,19 +1388,15 @@ const LaporanPage = () => {
               </div>
             )}
 
-            {/* Filter dan Cetak Barang Keluar */}
-            <div className="card">
+            <div className="card mb-4">
               <div className="card-body">
                 <div className="d-flex mt-2 justify-content-between align-items-center mb-3">
                   <div>
                     <label className="m-3">Tampilkan:</label>
                     <select
                       className="form-select d-inline-block w-auto"
-                      value={itemsPerPage}
-                      onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                      }}
+                      value={paginationKeluar.itemsPerPage}
+                      onChange={handleItemsPerPageKeluar}
                     >
                       <option value="5">5</option>
                       <option value="10">10</option>
@@ -974,7 +1405,6 @@ const LaporanPage = () => {
                       <option value="100">100</option>
                     </select>
                   </div>
-                  {/* <span className="fw-semibold me-5">Total Data: {inventory.length}</span> */}
                   <div className="d-flex align-items-center w-25 me-3">
                     <label className="me-2 mb-0 fw-semibold">Search:</label>
                     <input
@@ -990,20 +1420,20 @@ const LaporanPage = () => {
                 {/* Tabel Barang Keluar */}
                 <div className="mt-3 table-responsive">
                   <table className="table table-bordered">
-                    <thead className="table-warning">
+                    <thead className="table-info">
                       <tr>
                         <th className="text-center">No</th>
                         <th className="text-center">Tanggal</th>
                         <th className="text-center">Nama Barang</th>
-                        <th>Harga</th>
-                        <th>Jumlah Keluar</th>
-                        <th>Total Harga</th>
+                        <th className="text-center">Harga</th>
+                        <th className="text-center">Jumlah</th>
+                        <th className="text-center">Total Harga</th>
                       </tr>
                     </thead>
                     <tbody>
                       {loading.keluar ? (
                         <tr>
-                          <td colSpan="4" className="text-center">
+                          <td colSpan="6" className="text-center">
                             <div
                               className="spinner-border text-primary"
                               role="status"
@@ -1029,7 +1459,7 @@ const LaporanPage = () => {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="4" className="text-center">
+                          <td colSpan="6" className="text-center">
                             {paginationKeluar.searchKeyword
                               ? "Tidak ditemukan barang dengan nama tersebut"
                               : "Tidak ada data"}
@@ -1046,10 +1476,9 @@ const LaporanPage = () => {
                       Menampilkan {startIndexKeluar + 1}-
                       {Math.min(endIndexKeluar, filteredBarangKeluar.length)}{" "}
                       dari {filteredBarangKeluar.length} item
-                    </span>
-                    <div>
+                    </span>                    <div className="d-flex">
                       <button
-                        className="btn btn-outline-primary me-3"
+                        className="btn btn-outline-primary me-1"
                         onClick={() =>
                           handlePageChangeKeluar(
                             paginationKeluar.currentPage - 1
@@ -1057,10 +1486,24 @@ const LaporanPage = () => {
                         }
                         disabled={paginationKeluar.currentPage === 1}
                       >
-                        &laquo; Previous
+                        &lt;
                       </button>
+
+                      {[...Array(totalPagesKeluar).keys()].slice(
+                        Math.max(0, paginationKeluar.currentPage - 3),
+                        Math.min(totalPagesKeluar, paginationKeluar.currentPage + 2)
+                      ).map(i => (
+                        <button
+                          key={i + 1}
+                          className={`btn ${paginationKeluar.currentPage === i + 1 ? 'btn-primary' : 'btn-outline-primary'} mx-1`}
+                          onClick={() => handlePageChangeKeluar(i + 1)}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+
                       <button
-                        className="btn btn-outline-primary"
+                        className="btn btn-outline-primary ms-1"
                         onClick={() =>
                           handlePageChangeKeluar(
                             paginationKeluar.currentPage + 1
@@ -1071,11 +1514,154 @@ const LaporanPage = () => {
                           totalPagesKeluar === 0
                         }
                       >
-                        Next &raquo;
+                        &gt;
                       </button>
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+
+            <hr></hr>            <h5 className="mb-3">Laporan Stok Barang</h5>
+
+            {/* Button for Inventory Report */}
+            <div className="row g-3 mb-3">
+              <div className="col-md-12">                <button
+                className="btn btn-success"
+                onClick={() => previewPDF("inventory")}
+                disabled={loading.inventory || inventory.length === 0}
+              >
+                <i className="bi bi-printer me-2"></i>Cetak
+              </button>
+              </div>
+            </div>
+
+            <div className="card mb-4">
+              <div className="card-body">
+                <div className="d-flex mt-2 justify-content-between align-items-center mb-3">
+                  <div>
+                    <label className="m-3">Tampilkan:</label>
+                    <select
+                      className="form-select d-inline-block w-auto"
+                      value={paginationInventory.itemsPerPage}
+                      onChange={handleItemsPerPageInventory}
+                    >
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                    </select>
+                  </div>
+                  <div className="d-flex align-items-center w-25 me-3">
+                    <label className="me-2 mb-0 fw-semibold">Search:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Cari nama barang..."
+                      value={paginationInventory.searchKeyword}
+                      onChange={handleSearchInventory}
+                    />
+                  </div>
+                </div>
+                {/* Tabel Inventory */}
+                <div className="mt-3 table-responsive">
+                  <table className="table table-bordered">                    <thead className="table-info">
+                    <tr>
+                      <th className="text-center">No</th>
+                      <th className="text-center">Nama Barang</th>
+                      <th className="text-center">Kategori</th>
+                      <th className="text-center">Harga</th>
+                      <th className="text-center">Stok</th>
+                    </tr>
+                  </thead>
+                    <tbody>
+                      {loading.inventory ? (
+                        <tr>
+                          <td colSpan="5" className="text-center">
+                            <div
+                              className="spinner-border text-primary"
+                              role="status"
+                            >
+                              <span className="visually-hidden">
+                                Loading...
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : currentInventory.length > 0 ? (
+                        currentInventory.map((item, index) => (
+                          <tr key={`inventory-${item.id}`}>
+                            <td className="text-center">
+                              {startIndexInventory + index + 1}
+                            </td>                            <td>{item.nama_barang || item.nama}</td>
+                            <td>{item.kategori}</td>
+                            <td className="text-end">{formatCurrency(item.harga)}</td>
+                            <td className="text-center">{item.stok || 0}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="text-center">
+                            {paginationInventory.searchKeyword
+                              ? "Tidak ditemukan barang dengan nama tersebut"
+                              : "Tidak ada data"}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                  {/* Pagination Inventory */}
+                  {filteredInventory.length > 0 && (
+                    <div className="d-flex justify-content-between align-items-center m-3">
+                      <span>
+                        Menampilkan {startIndexInventory + 1}-
+                        {Math.min(endIndexInventory, filteredInventory.length)}{" "}
+                        dari {filteredInventory.length} item
+                      </span>                      <div className="d-flex">
+                        <button
+                          className="btn btn-outline-primary me-1"
+                          onClick={() =>
+                            handlePageChangeInventory(
+                              paginationInventory.currentPage - 1
+                            )
+                          }
+                          disabled={paginationInventory.currentPage === 1}
+                        >
+                          &lt;
+                        </button>
+
+                        {[...Array(totalPagesInventory).keys()].slice(
+                          Math.max(0, paginationInventory.currentPage - 3),
+                          Math.min(totalPagesInventory, paginationInventory.currentPage + 2)
+                        ).map(i => (
+                          <button
+                            key={i + 1}
+                            className={`btn ${paginationInventory.currentPage === i + 1 ? 'btn-primary' : 'btn-outline-primary'} mx-1`}
+                            onClick={() => handlePageChangeInventory(i + 1)}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+
+                        <button
+                          className="btn btn-outline-primary ms-1"
+                          onClick={() =>
+                            handlePageChangeInventory(
+                              paginationInventory.currentPage + 1
+                            )
+                          }
+                          disabled={
+                            paginationInventory.currentPage === totalPagesInventory ||
+                            totalPagesInventory === 0
+                          }
+                        >
+                          &gt;
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -1095,8 +1681,9 @@ const LaporanPage = () => {
             <div className="modal-content" style={{ height: "100%" }}>
               <div className="modal-header">
                 <h5 className="modal-title">
-                  Preview Laporan Barang{" "}
-                  {pdfPreview.type === "masuk" ? "Masuk" : "Keluar"}
+                  {pdfPreview.type === "inventory"
+                    ? "Preview Laporan Stok Barang"
+                    : `Preview Laporan Barang ${pdfPreview.type === "masuk" ? "Masuk" : "Keluar"}`}
                 </h5>
                 <button
                   type="button"
@@ -1128,6 +1715,56 @@ const LaporanPage = () => {
                   onClick={downloadPDF}
                 >
                   <i className="bi bi-download me-2"></i>Download PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi */}
+      {confirmModal.show && (
+        <div
+          className="modal fade show"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Konfirmasi Cetak</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setConfirmModal({ show: false, type: "" })}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Apakah Anda yakin ingin mencetak semua data?</p>
+                <p className="text-muted small">
+                  <i className="bi bi-info-circle me-1"></i>
+                  Data yang dicetak akan menampilkan seluruh data tanpa filter.
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={() => {
+                    setConfirmModal({ show: false, type: "" });
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => {
+                    const type = confirmModal.type;
+                    setConfirmModal({ show: false, type: "" });
+                    generatePDF(type);
+                  }}
+                >
+                  Cetak
                 </button>
               </div>
             </div>
