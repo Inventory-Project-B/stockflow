@@ -278,7 +278,7 @@ function Dashboard() {
               <div className="col-md-6 mb-4">
                 <div className="card mb-4">
                   <div className="card-header d-flex justify-content-between align-items-center">
-                    <h5>Barang Masuk (Total)</h5>
+                    <h5>Barang Masuk dari Supplier</h5>
                     <select
                       className="form-select w-auto"
                       value={selectedMonthMasuk}
@@ -307,7 +307,7 @@ function Dashboard() {
               <div className="col-md-6 mb-4">
                 <div className="card mb-4">
                   <div className="card-header d-flex justify-content-between align-items-center">
-                    <h5>Barang Keluar</h5>
+                    <h5>Barang Keluar (Terjual)</h5>
                     <select
                       className="form-select w-auto"
                       value={selectedMonthKeluar}
