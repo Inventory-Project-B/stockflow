@@ -7,52 +7,101 @@ const BarangKeluar = () => {
   const [barangList, setBarangList] = useState([]);
   const [formData, setFormData] = useState({
     barang_id: "",
-    tanggal: "",
     jumlah: "",
+    tanggal: "",
     harga: "",
-    jumlahHarga: "",
-
   });
   const [editId, setEditId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const token = localStorage.getItem("token");
 
-  // Inisialisasi data dummy
   useEffect(() => {
-    const dummyBarang = [
-      { id: 1, nama_barang: "Gamis Shanum" },
-      { id: 2, nama_barang: "Midi Dress Maura" },
-      { id: 3, nama_barang: "Daster Ashanty" },
-      { id: 4, nama_barang: "Gamis Raya" },
-    ];
-    const dummyBarangKeluar = [
-      { id: 1, barang_id: 1, nama_barang: "Gamis Shanum", jumlah: 7, harga: 275000, jumlahHarga: 1925000, tanggal: "2025-05-25" },
-      { id: 2, barang_id: 2, nama_barang: "Midi Dress Maura", jumlah: 4, harga: 165000, jumlahHarga: 660000, tanggal: "2025-05-26" },
-      { id: 3, barang_id: 3, nama_barang: "Daster Ashanty", jumlah: 2, harga: 95000, jumlahHarga: 190000, tanggal: "2025-05-27" },
-      { id: 4, barang_id: 4, nama_barang: "Gamis Raya", jumlah: 1, harga: 180000, jumlahHarga: 180000, tanggal: "2025-05-28" },
-    ];
-    setBarangList(dummyBarang);
-    setBarangKeluar(dummyBarangKeluar);
+    fetchBarangKeluar();
+    fetchBarangList();
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const fetchBarangKeluar = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/barang-keluar", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setBarangKeluar(data);
+    } catch (err) {
+      console.error("Gagal mengambil data barang keluar", err);
+    }
   };
 
-  const handleSubmit = (e) => {
+  const fetchBarangList = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/barang", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setBarangList(data);
+    } catch (err) {
+      console.error("Gagal mengambil daftar barang", err);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  // Update harga when barang is selected
+  const handleBarangChange = (e) => {
+    const selectedBarangId = e.target.value;
+    const selectedBarang = barangList.find(
+      (barang) => barang.id == selectedBarangId
+    );
+
+    setFormData({
+      ...formData,
+      barang_id: selectedBarangId,
+      harga: selectedBarang ? selectedBarang.harga : "",
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const barang = barangList.find((b) => b.id === parseInt(formData.barang_id));
-    const newItem = {
-      id: barangKeluar.length + 1,
-      barang_id: parseInt(formData.barang_id),
-      nama_barang: barang.nama_barang,
-      jumlah: parseInt(formData.jumlah),
-      tanggal: formData.tanggal,
-    };
-    setBarangKeluar([...barangKeluar, newItem]);
-    setFormData({ barang_id: "", jumlah: "", tanggal: "" });
-    document.getElementById("closeModal").click();
+    try {
+      const response = await fetch("http://localhost:5000/api/barang-keluar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          barang_id: formData.barang_id,
+          jumlah: parseInt(formData.jumlah, 10),
+          tanggal: formData.tanggal,
+          // harga: parseInt(formData.harga, 10),
+        }),
+      });
+
+      if (response.ok) {
+        await fetchBarangKeluar();
+        setFormData({ barang_id: "", jumlah: "", tanggal: "", harga: "" });
+        document.getElementById("closeModal").click();
+      } else {
+        console.error("Gagal menambah barang keluar");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+    }
   };
 
   const handleEditClick = (item) => {
@@ -60,39 +109,109 @@ const BarangKeluar = () => {
     setFormData({
       barang_id: item.barang_id,
       jumlah: item.jumlah,
-      tanggal: item.tanggal,
+      tanggal: item.tanggal.split("T")[0],
+      harga: item.harga,
     });
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
-    const barang = barangList.find((b) => b.id === parseInt(formData.barang_id));
-    const updatedList = barangKeluar.map((item) =>
-      item.id === editId
-        ? {
-            ...item,
-            barang_id: parseInt(formData.barang_id),
-            nama_barang: barang.nama_barang,
-            jumlah: parseInt(formData.jumlah),
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/barang-keluar/${editId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            barang_id: formData.barang_id,
+            jumlah: parseInt(formData.jumlah, 10),
             tanggal: formData.tanggal,
-          }
-        : item
-    );
-    setBarangKeluar(updatedList);
-    setFormData({ barang_id: "", jumlah: "", tanggal: "" });
-    setEditId(null);
-    document.getElementById("closeEditModal").click();
-  };
+            harga: parseInt(formData.harga, 10),
+          }),
+        }
+      );
 
-  const handleDelete = (id) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-      setBarangKeluar(barangKeluar.filter((item) => item.id !== id));
+      if (response.ok) {
+        await fetchBarangKeluar();
+        setFormData({ barang_id: "", jumlah: "", tanggal: "", harga: "" });
+        setEditId(null);
+        document.getElementById("closeEditModal").click();
+      } else {
+        console.error("Gagal mengupdate barang keluar");
+      }
+    } catch (err) {
+      console.error("Error:", err);
     }
   };
 
-  const filteredItems = barangKeluar.filter((item) =>
-    item.nama_barang.toLowerCase().includes(searchKeyword.toLowerCase())
-  );
+  const handleDelete = async (id) => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/barang-keluar/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          await fetchBarangKeluar();
+        } else {
+          console.error("Gagal menghapus barang keluar");
+        }
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    }
+  };
+
+  // Functions for delete confirmation modal
+  const confirmDelete = (id) => {
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/barang-keluar/${deleteId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        await fetchBarangKeluar();
+        closeDeleteModal();
+      } else {
+        console.error("Gagal menghapus barang keluar");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+    }
+  };
+
+  const filteredItems = barangKeluar.filter((item) => {
+    const searchMatch = item.nama_barang
+      .toLowerCase()
+      .includes(searchKeyword.toLowerCase());
+    return searchMatch;
+  });
 
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -103,14 +222,25 @@ const BarangKeluar = () => {
     setCurrentPage(1);
   }, [searchKeyword, itemsPerPage]);
 
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
-     <div className="container-fluid">
+    <div className="container-fluid">
       <div className="row">
         <Sidebar />
         <div className="col-md-10 p-4">
           <Navbar />
+
           <div className="card p-3 mt-3 bg-light vh-auto border-0">
             <h2 className="mb-4">BARANG KELUAR</h2>
+
             <button
               className="btn mb-3 w-25"
               style={{ backgroundColor: "#7E3AF2", color: "white" }}
@@ -129,13 +259,14 @@ const BarangKeluar = () => {
                     value={itemsPerPage}
                     onChange={(e) => setItemsPerPage(Number(e.target.value))}
                   >
-                    {[5, 10, 25, 50, 100].map((val) => (
-                      <option key={val} value={val}>
-                        {val}
-                      </option>
-                    ))}
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
                   </select>
                 </div>
+
                 <div className="d-flex align-items-center w-25 me-3">
                   <label className="me-2 fw-semibold">Search:</label>
                   <input
@@ -157,7 +288,7 @@ const BarangKeluar = () => {
                       <th>Nama Barang</th>
                       <th>Harga</th>
                       <th>Jumlah Keluar</th>
-                      <th>Jumlah Harga</th>
+                      <th>Total Harga</th>
                       <th>Aksi</th>
                     </tr>
                   </thead>
@@ -165,21 +296,26 @@ const BarangKeluar = () => {
                     {filteredItems.length > 0 ? (
                       currentItems.map((item, index) => (
                         <tr key={item.id}>
-                          <td className="text-center">{indexOfFirstItem + index + 1}</td>
+                          <td className="text-center">
+                            {indexOfFirstItem + index + 1}
+                          </td>
                           <td>
-                            {new Date(item.tanggal).toLocaleDateString("id-ID", {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                            })}
+                            {new Date(item.tanggal).toLocaleDateString(
+                              "id-ID",
+                              {
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )}
                           </td>
                           <td>{item.nama_barang}</td>
-                          <td>Rp. {item.harga}</td>
+                          <td>{formatCurrency(item.harga)}</td>
                           <td>{item.jumlah}</td>
-                          <td>Rp. {item.jumlahHarga}</td>
-                          <td className="text-center">
+                          <td>{formatCurrency(item.jumlah * item.harga)}</td>                          <td className="text-center">
                             <button
-                              className="btn btn-sm btn-warning me-2"
+                              className="btn btn-sm me-2"
+                              style={{ backgroundColor: "#4CAF50", color: "white" }}
                               data-bs-toggle="modal"
                               data-bs-target="#modalEditBarangKeluar"
                               onClick={() => handleEditClick(item)}
@@ -188,7 +324,7 @@ const BarangKeluar = () => {
                             </button>
                             <button
                               className="btn btn-sm btn-danger"
-                              onClick={() => handleDelete(item.id)}
+                              onClick={() => confirmDelete(item.id)}
                             >
                               <i className="bi bi-trash"></i>
                             </button>
@@ -197,7 +333,7 @@ const BarangKeluar = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5" className="text-center">
+                        <td colSpan="7" className="text-center">
                           {searchKeyword
                             ? "Tidak ditemukan barang dengan nama tersebut"
                             : "Tidak ada data barang keluar"}
@@ -214,23 +350,38 @@ const BarangKeluar = () => {
                     Menampilkan {indexOfFirstItem + 1}-
                     {Math.min(indexOfLastItem, filteredItems.length)} dari{" "}
                     {filteredItems.length} item
-                  </span>
-                  <div>
+                  </span>                  <div className="d-flex">
                     <button
-                      className="btn btn-outline-primary me-3"
-                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      className="btn btn-outline-primary me-1"
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
                       disabled={currentPage === 1}
                     >
-                      &laquo; Previous
+                      &lt;
                     </button>
+
+                    {[...Array(totalPages).keys()].slice(
+                      Math.max(0, currentPage - 3),
+                      Math.min(totalPages, currentPage + 2)
+                    ).map(i => (
+                      <button
+                        key={i + 1}
+                        className={`btn ${currentPage === i + 1 ? 'btn-primary' : 'btn-outline-primary'} mx-1`}
+                        onClick={() => setCurrentPage(i + 1)}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+
                     <button
-                      className="btn btn-outline-primary"
+                      className="btn btn-outline-primary ms-1"
                       onClick={() =>
                         setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                       }
                       disabled={currentPage === totalPages || totalPages === 0}
                     >
-                      Next &raquo;
+                      &gt;
                     </button>
                   </div>
                 </div>
@@ -272,7 +423,7 @@ const BarangKeluar = () => {
                     className="form-control"
                     name="barang_id"
                     value={formData.barang_id}
-                    onChange={handleChange}
+                    onChange={handleBarangChange}
                     required
                   >
                     <option value="">Pilih Barang</option>
@@ -282,6 +433,18 @@ const BarangKeluar = () => {
                       </option>
                     ))}
                   </select>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Harga Satuan</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    name="harga"
+                    value={formData.harga}
+                    onChange={handleChange}
+                    required
+                    min="1"
+                  />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Jumlah</label>
@@ -295,16 +458,24 @@ const BarangKeluar = () => {
                     min="1"
                   />
                 </div>
-                <div className="d-flex justify-content-end gap-2">
+                <div className="mb-3">
+                  <label className="form-label">Total Harga</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={formatCurrency(formData.jumlah * formData.harga)}
+                    readOnly
+                  />
+                </div>                <div className="d-flex justify-content-end gap-2">
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-danger"
                     data-bs-dismiss="modal"
                   >
                     Batal
                   </button>
-                  <button type="submit" className="btn btn-primary">
-                    Tambah
+                  <button type="submit" className="btn btn-success">
+                    Simpan
                   </button>
                 </div>
               </form>
@@ -345,7 +516,7 @@ const BarangKeluar = () => {
                     className="form-control"
                     name="barang_id"
                     value={formData.barang_id}
-                    onChange={handleChange}
+                    onChange={handleBarangChange}
                     required
                   >
                     <option value="">Pilih Barang</option>
@@ -355,6 +526,18 @@ const BarangKeluar = () => {
                       </option>
                     ))}
                   </select>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Harga Satuan</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    name="harga"
+                    value={formData.harga}
+                    onChange={handleChange}
+                    required
+                    min="1"
+                  />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Jumlah</label>
@@ -368,19 +551,55 @@ const BarangKeluar = () => {
                     min="1"
                   />
                 </div>
-                <div className="d-flex justify-content-end gap-2">
+                <div className="mb-3">
+                  <label className="form-label">Total Harga</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={formatCurrency(formData.jumlah * formData.harga)}
+                    readOnly
+                  />
+                </div>                <div className="d-flex justify-content-end gap-2">
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-danger"
                     data-bs-dismiss="modal"
                   >
                     Batal
                   </button>
-                  <button type="submit" className="btn btn-primary">
+                  <button type="submit" className="btn btn-success">
                     Simpan Perubahan
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal Konfirmasi Hapus */}
+      <div className={`modal fade ${showDeleteModal ? "show" : ""}`}
+        style={{ display: showDeleteModal ? "block" : "none" }}
+        tabIndex="-1"
+        role="dialog">
+        <div className="modal-dialog modal-dialog-centered" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Konfirmasi Hapus</h5>
+              <button type="button" className="btn-close" onClick={closeDeleteModal} aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <p className="mb-4 text-center fs-5">
+                Apakah Anda yakin ingin menghapus data ini?
+              </p>
+              <div className="d-flex justify-content-end gap-2">
+                <button type="button" className="btn btn-success" onClick={closeDeleteModal}>
+                  Batal
+                </button>
+                <button type="button" className="btn btn-danger" onClick={handleDeleteConfirm}>
+                  Hapus
+                </button>
+              </div>
             </div>
           </div>
         </div>
