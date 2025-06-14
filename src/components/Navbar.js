@@ -13,7 +13,7 @@ const Navbar = () => {
     foto_profil: '',
     previewFoto: ''
   });
-  
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,10 +40,10 @@ const Navbar = () => {
           email,
           role,
           foto_profil,
-          previewFoto: foto_profil 
-            ? foto_profil.startsWith('http') 
-              ? foto_profil 
-              : `http://localhost:5000${foto_profil.startsWith('/') ? '' : '/'}${foto_profil}` 
+          previewFoto: foto_profil
+            ? foto_profil.startsWith('http')
+              ? foto_profil
+              : `http://localhost:5000${foto_profil.startsWith('/') ? '' : '/'}${foto_profil}`
             : ''
         });
 
@@ -56,11 +56,10 @@ const Navbar = () => {
 
     fetchProfile();
   }, [navigate]); // Dependency array to ensure this runs once when the component is mounted
-
   return (
-    <nav className="navbar navbar-expand-lg navbar-light px-4 shadow-sm">
+    <nav className="navbar navbar-expand-lg navbar-light px-4 shadow-sm position-sticky top-0 bg-white" style={{ zIndex: 1030 }}>
       <div className="container">
-        
+
         {/* Menu Navbar */}
         <div className="collapse navbar-collapse justify-content-end me-2">
           <ul className="navbar-nav align-items-center">
@@ -70,12 +69,12 @@ const Navbar = () => {
                 to="/profile"
                 className="nav-link d-flex align-items-center"
               >
-                <div className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center me-3" 
-                     style={{ width: '40px', height: '40px' }}>
+                <div className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center me-3"
+                  style={{ width: '40px', height: '40px' }}>
                   {userData.previewFoto ? (
-                    <img 
-                      src={userData.previewFoto} 
-                      alt="Profile" 
+                    <img
+                      src={userData.previewFoto}
+                      alt="Profile"
                       className="rounded-circle w-100 h-100 object-fit-cover"
                       onError={(e) => {
                         e.target.src = 'http://localhost:5000/uploads/profile/default.png'; // Default photo if error

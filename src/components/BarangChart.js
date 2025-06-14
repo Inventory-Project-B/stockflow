@@ -15,33 +15,47 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 // Daftar bulan dari Januari sampai Desember
 const bulanLabels = [
-  "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", 
-  "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+];
+
+// Versi singkat untuk label chart
+const bulanSingkat = [
+  "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+  "Jul", "Ags", "Sep", "Okt", "Nov", "Des"
 ];
 
 function BarangChart({ data, title, backgroundColor, borderColor }) {
-  // Buat objek dengan nilai default 0 untuk semua bulan
-  const dataByMonth = bulanLabels.reduce((acc, bulan) => {
-    acc[bulan] = 0;
-    return acc;
-  }, {});
+  // Data sudah diformat di Dashboard.js
+  const dataByLabel = {};
+  const chartLabels = [];
 
-  // Isi data dari API ke dalam objek dataByMonth
+  // Ambil data dari props
   data.forEach((item) => {
-    const bulanIndex = new Date(item.tanggal).getMonth(); // Ambil bulan dari tanggal (0-11)
-    const bulanNama = bulanLabels[bulanIndex]; // Konversi ke nama bulan
-    if (bulanNama) {
-      dataByMonth[bulanNama] = item.jumlah;
+    if (item.tanggal && item.jumlah !== undefined) {
+      dataByLabel[item.tanggal] = item.jumlah;
+      // Tambahkan label ke array jika belum ada
+      if (!chartLabels.includes(item.tanggal)) {
+        chartLabels.push(item.tanggal);
+      }
     }
   });
 
+  // Tentukan labels berdasarkan data yang diterima
+  // Jika formatnya seperti "Jun-9", gunakan labels dari data
+  // Jika formatnya adalah nama bulan penuh, gunakan bulanSingkat
+  const isDateFormat = chartLabels.length > 0 && chartLabels[0].includes('-');
+  const labels = isDateFormat ? chartLabels : bulanSingkat;
+
   // Buat dataset untuk chart
   const chartData = {
-    labels: bulanLabels,
+    labels: labels,
     datasets: [
       {
         label: title,
-        data: bulanLabels.map((bulan) => dataByMonth[bulan]), // Data sesuai urutan bulan
+        data: isDateFormat
+          ? labels.map(label => dataByLabel[label] || 0)
+          : bulanLabels.map((bulan) => dataByLabel[bulan] || 0), // Data sesuai urutan bulan
         backgroundColor: backgroundColor + "80", // Tambah transparansi 50%
         borderColor: borderColor,
         borderWidth: 2,
