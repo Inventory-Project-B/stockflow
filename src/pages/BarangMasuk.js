@@ -51,7 +51,12 @@ const BarangMasuk = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // Prevent negative values for jumlah
+    if (name === "jumlah" && value < 0) {
+      return;
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   // Tambah barang masuk menggunakan API
@@ -362,6 +367,8 @@ const BarangMasuk = () => {
                     name="jumlah"
                     value={formData.jumlah}
                     onChange={handleChange}
+                    onWheel={(e) => e.target.blur()}
+                    min="0"
                     required
                   />                </div>
                 <div className="d-flex justify-content-end gap-2">
@@ -429,6 +436,8 @@ const BarangMasuk = () => {
                     name="jumlah"
                     value={formData.jumlah}
                     onChange={handleChange}
+                    onWheel={(e) => e.target.blur()}
+                    min="0"
                     required
                   />                </div>
                 <div className="d-flex justify-content-end gap-2">

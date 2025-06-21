@@ -87,6 +87,10 @@ function Dashboard() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Prevent negative values for price and stock
+    if ((name === 'harga' || name === 'stok') && value < 0) {
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -477,6 +481,8 @@ function Dashboard() {
                     name="harga"
                     value={formData.harga}
                     onChange={handleChange}
+                    onWheel={(e) => e.target.blur()}
+                    min="0"
                     required
                   />
                 </div>
@@ -491,6 +497,8 @@ function Dashboard() {
                     name="stok"
                     value={formData.stok}
                     onChange={handleChange}
+                    onWheel={(e) => e.target.blur()}
+                    min="0"
                     required
                   />
                 </div>
@@ -597,6 +605,8 @@ function Dashboard() {
                     name="harga"
                     value={formData.harga}
                     onChange={handleChange}
+                    onWheel={(e) => e.target.blur()}
+                    min="0"
                     required
                   />
                 </div>
@@ -611,6 +621,8 @@ function Dashboard() {
                     name="stok"
                     value={formData.stok}
                     onChange={handleChange}
+                    onWheel={(e) => e.target.blur()}
+                    min="0"
                     required
                   />
                 </div>
